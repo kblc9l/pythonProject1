@@ -1,3 +1,28 @@
 h1{
     color: red;
 }
+
+.p1{
+    background: #D6D8D9;
+    color: #1B1E21;
+}
+
+.p2{
+    background: #D4EDDA;
+    color: #3A474C;
+}
+
+.p3{
+    background: #E2E3E5;
+    color: #3A474C;
+}
+
+.p4{
+    background: #FFF3CD;
+    color: #856404;
+}
+
+.p5{
+    background: #F8D7DA;
+    color: #721C25;
+}
