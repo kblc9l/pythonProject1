@@ -22,9 +22,8 @@ def promotion():
                         'Присоединяйся!'])
 
 
-@app.route('/image_mars')
+@app.route('/promotion_image')
 def image_mars():
-
     with open('index.html', encoding='utf8') as f:
         return f.read()
 
