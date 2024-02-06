@@ -21,8 +21,13 @@ def promotion():
                         'И начнем с Марса!',
                         'Присоединяйся!'])
 
+
 @app.route('/image_mars')
 def image_mars():
-    return
+
+    with open('index.html', encoding='utf8') as f:
+        return f.read()
+
+
 if __name__ == '__main__':
     app.run(port=8080, host='127.0.0.1')
