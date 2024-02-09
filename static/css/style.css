@@ -1,5 +1,6 @@
-h1{
-    color: red;
+h1, h3{
+    color: black;
+    text-align: center;
 }
 
 .p1{
@@ -25,4 +26,15 @@ h1{
 .p5{
     background: #F8D7DA;
     color: #721C25;
+}
+
+
+form.login_form {
+    margin-left: auto;
+    margin-right: auto;
+    max-width: 450px;
+    background-color: #ffcc00;
+    border: 1px solid gray;
+    border-radius: 5px;
+    padding: 10px;
 }

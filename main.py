@@ -28,5 +28,11 @@ def image_mars():
         return f.read()
 
 
+@app.route('/astronaut_selection')
+def astronaut_selection():
+    with open('astronaut_selection.html', encoding='utf8') as f:
+        return f.read()
+
+
 if __name__ == '__main__':
     app.run(port=8080, host='127.0.0.1')
