@@ -1,37 +1,6 @@
-from flask import Flask
+from flask import Flask, render_template
 
 app = Flask(__name__)
-
-
-@app.route('/')
-def index():
-    return 'Миссия Колонизация Марса'
-
-
-@app.route('/index')
-def index2():
-    return 'И на Марсе будут яблони цвести!'
-
-
-@app.route('/promotion')
-def promotion():
-    return '<br>'.join(['Человечество вырастает из детства.',
-                        'Человечеству мала одна планета.',
-                        'Мы сделаем обитаемыми безжизненные пока планеты.',
-                        'И начнем с Марса!',
-                        'Присоединяйся!'])
-
-
-@app.route('/promotion_image')
-def image_mars():
-    with open('index.html', encoding='utf8') as f:
-        return f.read()
-
-
-@app.route('/astronaut_selection')
-def astronaut_selection():
-    with open('astronaut_selection.html', encoding='utf8') as f:
-        return f.read()
 
 
 # @app.route('/choice/<planet_name>')
@@ -54,10 +23,16 @@ def astronaut_selection():
 #                     </body>
 #                     </html>'''
 
-@app.route('/choice/<planet_name>')
-def choice(planet_name):
-    with open('choice.html', encoding='utf8') as f:
-        return str(f.read()).replace('{planet}', planet_name)
+# @app.route('/choice/<planet_name>')
+# def choice(planet_name):
+#     with open('1lesson/choice.html', encoding='utf8') as f:
+#         return str(f.read()).replace('{planet}', planet_name)
+
+
+@app.route('/<title>')
+@app.route('/index/<title>')
+def index(title):
+    return render_template('base.html', title=title)
 
 
 if __name__ == '__main__':
