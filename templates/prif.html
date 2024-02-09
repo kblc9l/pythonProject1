@@ -1,10 +1,18 @@
 {% extends "base.html" %}
 
 {% block content %}
-    {% if 'инженер' in prof or 'строитель' in prof %}
-    <h2>Инженерные тренажёры</h2>
-<!--   <img src='../static/img/1.png' alt="ну значит не загрузилась">-->
-    {% else  %}
-    <h2>Инженерные тренажёры</h2>
-    {% endif %}
+    <h2>
+        {% if 'инженер' in prof %}
+            Инженерные тренажеры
+        {% else %}
+            Научные симуляторы
+        {% endif %}
+    </h2>
+    <div>
+        {% if 'инженер' in prof %}
+            <img src="/static/img/1.png" alt="Инженерные тренажеры">
+        {% else %}
+            <img src="/static/img/img_1.png" alt="Научные симуляторы">
+        {% endif %}
+    </div>
 {% endblock %}
