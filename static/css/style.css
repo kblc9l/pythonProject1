@@ -1,4 +1,4 @@
-h1, h3{
+h1, h3, h2{
     color: black;
     text-align: center;
 }
@@ -37,4 +37,11 @@ form.login_form {
     border: 1px solid gray;
     border-radius: 5px;
     padding: 10px;
+}
+
+.form-group{
+    display: flex;
+    flex-direction: column;
+    width: 500px;
+    margin: 0 auto;
 }
