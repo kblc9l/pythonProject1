@@ -1,189 +1,120 @@
-import requests
-
-from io import BytesIO
-import pygame
-
-# ll = list(map(float, input('ВВеди координаты через запятую').split(',')))
-# z = int(input('Введи маштаб от 0 до 21'))
-# print(ll)
-STATIC_API_URL = "http://static-maps.yandex.ru/1.x/"
-GEOCODER_API_URL = "http://geocode-maps.yandex.ru/1.x/"
-GEOCODER_API_KEY = "40d1649f-0493-4b70-98ba-98533de7710b"
-
-
-def get_map_image_by_geocode(geocode: str, index=0, add_point=False, autoscale=False):
-    geocoder_params = {
-        "apikey": GEOCODER_API_KEY,
-        "geocode": geocode,
-        "format": "json"
-    }
-
-    response = requests.get(GEOCODER_API_URL, geocoder_params).json()
-
-    members = response["response"]["GeoObjectCollection"]["featureMember"]
-
-    # Рамка вокруг объекта:
-    envelope = members[index]["GeoObject"]["boundedBy"]["Envelope"]
-
-    # левая, нижняя, правая и верхняя границы из координат углов:
-    top_left = envelope["upperCorner"].split(" ")
-    bottom_right = envelope["lowerCorner"].split(" ")
-
-    static_api_params = {
-        "l": "map",
-        "ll": ",".join(top_left),
-        "bbox": ",".join(top_left) + '~' + ",".join(bottom_right)
-    }
-
-    if add_point:
-        point = [float(val) for val in members[index]["GeoObject"]["Point"]["pos"].split(" ")]
-        static_api_params["pt"] = f"{point[0]},{point[1]},pm2rdm"
-
-    if autoscale:
-        static_api_params["spn"] = calculate_scale(top_left, bottom_right)
-
-    response = requests.get(STATIC_API_URL, static_api_params)
-    return response.content
-
-
-def get_map_image_by_ll_z(ll, z):
-    static_api_params = {
-        "l": "map",
-        "ll": ','.join(list(map(str, ll))),
-        'z': z
-    }
-
-    response = requests.get(STATIC_API_URL, static_api_params)
-    return response.content
-
-
-def calculate_scale(top_left: tuple, bottom_right: str):
-    # Вычисляем полуразмеры по вертикали и горизонтали
-    dx = round(abs(float(top_left[1]) - float(bottom_right[1])) / 2.0, 5)
-    dy = round(abs(float(top_left[0]) - float(bottom_right[0])) / 2.0, 5)
-
-    span = f"{dx},{dy}"
-    return span
-
-
-# def show_image():
-#     global z, ll
-#
-#     pygame.init()
-#     screen = pygame.display.set_mode((600, 450))
-#     running = True
-#     while running:
-#         image = pygame.image.load(BytesIO(get_map_image_by_ll_z(ll, z)))
-#
-#         screen.blit(image, (0, 0))
-#         for event in pygame.event.get():
-#             if event.type == pygame.QUIT:
-#                 return
-#             if event.type == pygame.KEYDOWN:
-#                 if event.key == pygame.K_PAGEUP:
-#                     z -= 1
-#                     if z == -1:
-#                         z = 0
-#                 if event.key == pygame.K_PAGEDOWN:
-#                     z += 1
-#                     if z == 22:
-#                         z = 21
-#
-#                 if event.key == pygame.K_UP:
-#                     ll[1] += 0.75 * (21 - z) / z
-#                 if event.key == pygame.K_DOWN:
-#                     ll[1] -= 0.75 * (21 - z) / z
-#                 if event.key == pygame.K_RIGHT:
-#                     ll[0] += 0.75 * (21 - z) / z
-#                 if event.key == pygame.K_LEFT:
-#                     ll[0] -= 0.75 * (21 - z) / z
-#
-#         pygame.display.flip()
-
-    # 37.530887,55.703118
-
-def show_image(image_data):
-    pygame.init()
-    image = pygame.image.load(BytesIO(image_data))
-    image_rect = image.get_rect()
-    width, height = image_rect[2], image_rect[3]
-    screen = pygame.display.set_mode((width, height))
-    screen.blit(image, (0, 0))
-    running = True
-    while running:
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                return
-        pygame.display.flip()
-
-
-show_image(get_map_image_by_geocode(input(), add_point=True))
+import io
+from PyQt5 import uic, QtCore
+from PyQt5.QtWidgets import QMainWindow, QApplication
+from PyQt5.QtGui import QPixmap, QImage
+import sys
 
 import requests
+from PIL import Image
 
-from io import BytesIO
-import pygame
+toponym_to_find = " ".join(sys.argv[1:])
 
-STATIC_API_URL = "http://static-maps.yandex.ru/1.x/"
-GEOCODER_API_URL = "http://geocode-maps.yandex.ru/1.x/"
-GEOCODER_API_KEY = "40d1649f-0493-4b70-98ba-98533de7710b"
+geocoder_api_server = "http://geocode-maps.yandex.ru/1.x/"
+
+geocoder_params = {
+    "apikey": "40d1649f-0493-4b70-98ba-98533de7710b",
+    "geocode": toponym_to_find,
+    "format": "json"}
+
+response = requests.get(geocoder_api_server, params=geocoder_params)
+
+if not response:
+    geocoder_params['geocode'] = 'Россия, Москва, Красная площадь'
+    response = requests.get(geocoder_api_server, params=geocoder_params)
+
+# Преобразуем ответ в json-объект
+json_response = response.json()
+# Получаем первый топоним из ответа геокодера.
+toponym = json_response["response"]["GeoObjectCollection"][
+    "featureMember"][0]["GeoObject"]
+
+low = toponym['boundedBy']['Envelope']['lowerCorner']
+up = toponym['boundedBy']['Envelope']['upperCorner']
 
 
-def get_map_image_by_geocode(geocode: list, index=0, add_point=False):
-    lst_image = []
-    for i in range(len(geocode)):
-        geocoder_params = {
-            "apikey": GEOCODER_API_KEY,
-            "geocode": geocode[i],
-            "format": "json",
-            'kind': 'metro'
+class DBSample(QMainWindow):
+    def __init__(self):
+        super().__init__()
+        uic.loadUi('design.ui', self)
+        self.delta = 0.01
+        self.index = 0
+
+        toponyms = json_response["response"]["GeoObjectCollection"][
+            "featureMember"][0]["GeoObject"]
+        toponym_coodrinates = toponyms["Point"]["pos"]
+        # Долгота и широта:
+        self.toponym_longitude, self.toponym_lattitude = (float(elem) for elem in toponym_coodrinates.split(" "))
+
+        self.pushButton.clicked.connect(self.redact_index)
+
+        self.draw_image()
+
+    def draw_image(self):
+        im = self.get_im()
+        im = im.convert("RGB")
+        data = im.tobytes("raw", "RGB")
+        qi = QImage(data, im.size[0], im.size[1], im.size[0] * 3, QImage.Format.Format_RGB888)
+        self.pixmap = QPixmap.fromImage(qi)
+        self.label_im.setPixmap(self.pixmap)
+
+    def keyPressEvent(self, event):
+        if event.key() == QtCore.Qt.Key_X:
+            if self.delta > 0.001:
+                self.delta -= self.delta / 1.5
+                self.draw_image()
+        elif event.key() == QtCore.Qt.Key_Z:
+            if self.delta < 50:
+                self.delta += self.delta / 1.5
+                self.draw_image()
+        elif event.key() == QtCore.Qt.Key_A:
+            if not (self.toponym_longitude - self.delta < -180):
+                self.toponym_longitude -= self.delta
+            else:
+                self.toponym_longitude = 179
+            self.draw_image()
+        elif event.key() == QtCore.Qt.Key_D:
+            if not (self.toponym_longitude + self.delta > 180):
+                self.toponym_longitude += self.delta
+            else:
+                self.toponym_longitude = -179
+            self.draw_image()
+        elif event.key() == QtCore.Qt.Key_W:
+            if not (self.toponym_lattitude + self.delta / 1.5 > 90):
+                self.toponym_lattitude += self.delta / 1.5
+            else:
+                self.toponym_lattitude = 80
+            self.draw_image()
+        elif event.key() == QtCore.Qt.Key_S:
+            if not (self.toponym_lattitude - self.delta / 1.5 < -90):
+                self.toponym_lattitude -= self.delta / 1.5
+            else:
+                self.toponym_lattitude = -80
+            self.draw_image()
+
+    def get_im(self):
+
+        map_params = {
+            "ll": ",".join([str(self.toponym_longitude),
+                            str(self.toponym_lattitude)]),
+            "spn": ",".join([str(self.delta), str(self.delta)]),
+            "l": ["map", 'sat', 'skl'][self.index]
         }
 
-        response = requests.get(GEOCODER_API_URL, geocoder_params).json()
+        map_api_server = "http://static-maps.yandex.ru/1.x/"
+        responses = requests.get(map_api_server, params=map_params)
 
-        members = response["response"]["GeoObjectCollection"]["featureMember"]
+        image = Image.open(io.BytesIO(responses.content))
+        return image
 
-        envelope = members[index]["GeoObject"]["boundedBy"]["Envelope"]
-        print(members)
-
-        top_left = envelope["upperCorner"].split(" ")
-        # bottom_right = envelope["lowerCorner"].split(" ")
-
-        static_api_params = {
-            "l": "map",
-            "ll": ",".join(top_left),
-            # "bbox": ",".join(top_left) + '~' + ",".join(bottom_right),
-            'z': 14
-
-        }
-        if add_point:
-            point = [float(val) for val in members[index]["GeoObject"]["Point"]["pos"].split(" ")]
-            static_api_params['pt'] = f"{point[0]},{point[1]},pm2rdm"
-
-        response = requests.get(STATIC_API_URL, static_api_params).content
-        lst_image.append(response)
-
-    return lst_image
+    def redact_index(self):
+        self.index = (self.index + 1) % 3
+        self.draw_image()
 
 
-def show_image(image_data: list):
-    pygame.init()
-    index = 0
-    image = pygame.image.load(BytesIO(image_data[index]))
-    image_rect = image.get_rect()
-    width, height = image_rect[2], image_rect[3]
-    screen = pygame.display.set_mode((width, height))
-    screen.blit(image, (0, 0))
-    running = True
-    while running:
+if __name__ == '__main__':
+    app = QApplication(sys.argv)
 
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                return
+    ex = DBSample()
+    ex.show()
 
-        pygame.display.flip()
-
-
-images = get_map_image_by_geocode(['Москва, Динамо'], add_point=True)
-show_image(images)
-
+    sys.exit(app.exec_())
