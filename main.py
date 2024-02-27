@@ -6,20 +6,17 @@ app = Flask(__name__)
 href = '../static/img/img_2.png'
 
 
-@app.route('/list_prof/<typeL>')
-def list_prof(typeL: str):
-    profs = ''' менеджер по продажам,
-                продавец-консультант,
-                водитель,
-                бухгалтер,
-                программист, разработчик программного обеспечения,
-                врач,
-                инженер,
-                повар,
-                упаковщик и комплектовщик,
-                слесарь,
-                сантехник'''.strip().split(',')
-    return render_template('prof_list.html', title='Список профессий для полёта на Марс', profs=profs, typeL=typeL, )
+@app.route('/answer')
+@app.route('/auto_answer')
+def answer():
+    data = {'surname': 'sdfgsf',
+            'name': 'sfasfs',
+            'education': 'sfs',
+            'profession': 'sfsaf',
+            'sex': 'male',
+            'motivation': 'sfsf',
+            'ready': 'True'}
+    return render_template('auto_answer.html', title='Автоматический ответ', data=data)
 
 
 if __name__ == '__main__':
