@@ -1,22 +1,29 @@
 import os
 
-from flask import Flask, render_template, request
+from flask import Flask, render_template, redirect
+from flask_wtf import FlaskForm
+from wtforms import StringField, PasswordField, BooleanField, SubmitField
+from wtforms.validators import DataRequired
+
+
+class LoginForm(FlaskForm):
+    username = StringField('id астранавта', validators=[DataRequired()])
+    password = PasswordField('Пароль астранавта', validators=[DataRequired()])
+    username2 = StringField('id капитана', validators=[DataRequired()])
+    password2 = PasswordField('Пароль капитана', validators=[DataRequired()])
+    submit = SubmitField('Доступ')
+
 
 app = Flask(__name__)
-href = '../static/img/img_2.png'
+app.config['SECRET_KEY'] = 'yandexlyceum_secret_key'
 
 
-@app.route('/answer')
-@app.route('/auto_answer')
-def answer():
-    data = {'surname': 'sdfgsf',
-            'name': 'sfasfs',
-            'education': 'sfs',
-            'profession': 'sfsaf',
-            'sex': 'male',
-            'motivation': 'sfsf',
-            'ready': 'True'}
-    return render_template('auto_answer.html', title='Автоматический ответ', data=data)
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    form = LoginForm()
+    if form.validate_on_submit():
+        return redirect('/success')
+    return render_template('login.html', title='Авторизация', form=form)
 
 
 if __name__ == '__main__':
