@@ -6,86 +6,20 @@ app = Flask(__name__)
 href = '../static/img/img_2.png'
 
 
-@app.route('/<title>')
-@app.route('/index/<title>')
-def index(title):
-    return render_template('base.html', title=title)
-
-
-@app.route("/training/<prof>")
-def train(prof):
-    return render_template("prif.html", prof=prof)
-
-
-@app.route('/results/<nickname>/<level>/<rating>')
-def res(nickname, level, rating):
-    return render_template('result.html', nickname=nickname, level=str(level), rating=str(rating))
-
-
-@app.route('/load_photo', methods=['POST', 'GET'])
-def load_photo():
-    global href
-    if request.method == 'GET':
-        return f'''<!DOCTYPE html>
-                    <html lang="en">
-                    <head>
-                        <meta charset="UTF-8">
-                        <title>Title</title>
-                        <link rel="stylesheet" type='text/css' href="../static/css/style.css">
-                    </head>
-                    <body>
-                    <h1>Загрузите фотографии</h1>
-                    <h2>для участия в миссии</h2>
-
-
-                    <form method="post" enctype="multipart/form-data">
-                        <div class="form-group">
-                            <label for="photo">Приложите фотографию</label>
-                            <input type="file" class="form-control-file" id="photo" name="file">
-                            <img src='{href}' alt="">
-                        </div>
-                        <button type="submit" class="btn btn-primary">Отправить</button>
-                    </form>
-
-
-                    </body>
-                    </html>
-'''
-    elif request.method == 'POST':
-
-        f = request.files['file']
-        href = '../static/img/2.png'
-        if f:
-            f.save('static/img/2.png')
-            return f'''<!DOCTYPE html>
-                                <html lang="en">
-                                <head>
-                                    <meta charset="UTF-8">
-                                    <title>Title</title>
-                                    <link rel="stylesheet" type='text/css' href="../static/css/style.css">
-                                </head>
-                                <body>
-                                <h1>Загрузите фотографии</h1>
-                                <h2>для участия в миссии</h2>
-    
-    
-                                <form method="post" enctype="multipart/form-data">
-                                    <div class="form-group">
-                                        <label for="photo">Приложите фотографию</label>
-                                        <input type="file" class="form-control-file" id="photo" name="file">
-                                        <img src='{href}' alt="">
-                                    </div>
-                                    <button type="submit" class="btn btn-primary">Отправить</button>
-                                </form>
-    
-    
-                                </body>
-                                </html>'''
-
-
-@app.route('/carousel')
-def carousel():
-    return open('templates/slider.html', encoding='utf8').read()
+@app.route('/list_prof/<typeL>')
+def list_prof(typeL: str):
+    profs = ''' менеджер по продажам,
+                продавец-консультант,
+                водитель,
+                бухгалтер,
+                программист, разработчик программного обеспечения,
+                врач,
+                инженер,
+                повар,
+                упаковщик и комплектовщик,
+                слесарь,
+                сантехник'''.strip().split(',')
+    return render_template('prof_list.html', title='Список профессий для полёта на Марс', profs=profs, typeL=typeL, )
 
 
 if __name__ == '__main__':
