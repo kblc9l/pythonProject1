@@ -17,21 +17,13 @@ app.config['SECRET_KEY'] = 'yandexlyceum_secret_key'
 
 
 def main():
+    # name_db = input()
+    # db_session.global_init(name_db)
     db_session.global_init("db/blogs.db")
-    job = Jobs()
-    job.team_leader = 1
-    job.job = 'deployment of residential modules 1 and 2'
-    job.work_size = 15
-    job.collaborators = '2, 3'
-    job.start_date = datetime.datetime.now
-    job.is_finished = False
-
     db_sess = db_session.create_session()
-    db_sess.add(job)
-    db_sess.commit()
+    people = db_sess.query(User).filter(User.address == 'module_1')
+    print(*people)
 
-    job = db_sess.query(Jobs).first()
-    print(job.name)
     app.run()
 
 
