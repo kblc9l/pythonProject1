@@ -17,9 +17,9 @@ app.config['SECRET_KEY'] = 'yandexlyceum_secret_key'
 
 
 def main():
-    # name_db = input()
-    # db_session.global_init(name_db)
-    db_session.global_init("db/blogs.db")
+    name_db = input()
+    db_session.global_init(name_db)
+    # db_session.global_init("db/blogs.db")
     db_sess = db_session.create_session()
     people = db_sess.query(User).filter(User.address == 'module_1')
     print(*people)
